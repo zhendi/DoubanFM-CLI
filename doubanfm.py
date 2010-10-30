@@ -7,6 +7,7 @@ import pygst
 pygst.require("0.10")
 import gst
 import json,urllib2
+from select import select
 
 class DoubanFM_CLI:
 
@@ -37,13 +38,13 @@ class DoubanFM_CLI:
             self.player.set_property("uri", song_uri)
             self.player.set_state(gst.STATE_PLAYING)
             while self.playmode:
-                if raw_input() == 'n':
-                    self.player.set_state(gst.STATE_NULL)
-                    self.playmode = False
-                    break 
-                else:
-                    time.sleep(1)
-        loop.quit()
+                rlist, _, _ = select([sys.stdin], [], [], 1)
+                if rlist:
+                    s = sys.stdin.readline()
+                    if s[0] == 'n':
+                        self.player.set_state(gst.STATE_NULL)
+                        self.playmode = False
+                        break 
 
 channel_info = u'''
     1  华语兆赫
