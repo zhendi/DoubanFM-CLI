@@ -58,7 +58,7 @@ channel_info = u'''
     6  粤语兆赫
 '''
 print channel_info    
-c = raw_input(u'请输入您想听的频道数字:')
+c = raw_input('请输入您想听的频道数字:')
 doubanfm = DoubanFM_CLI(c)
 print u'如需跳过歌曲请输入n'
 while 1:
