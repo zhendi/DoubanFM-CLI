@@ -28,7 +28,7 @@ class DoubanFM_CLI:
             print "Error: %s" % err, debug
             self.playmode = False
 
-    def play(self):
+    def start(self):
         rets = json.loads(urllib2.urlopen(self.ch).read())
         for r in rets['song']:
             song_uri = r['url']
@@ -36,7 +36,6 @@ class DoubanFM_CLI:
             print u'正在播放： '+r['title']+u'     歌手： '+r['artist']
             self.player.set_property("uri", song_uri)
             self.player.set_state(gst.STATE_PLAYING)
-            
             while self.playmode:
                 if raw_input() == 'n':
                     self.player.set_state(gst.STATE_NULL)
@@ -44,9 +43,6 @@ class DoubanFM_CLI:
                     break 
                 else:
                     time.sleep(1)
-
-    def start(self):
-        self.play() 
         loop.quit()
 
 channel_info = u'''
