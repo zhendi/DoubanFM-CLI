@@ -45,6 +45,8 @@ class DoubanFM_CLI:
                         self.player.set_state(gst.STATE_NULL)
                         self.playmode = False
                         break 
+        loop.quit()
+        
 
 channel_info = u'''
     1  华语兆赫
