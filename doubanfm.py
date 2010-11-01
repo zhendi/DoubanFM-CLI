@@ -137,35 +137,29 @@ class DoubanFM_CLI:
                     self.playmode = False
                     break 
         loop.quit()
-        
-def fm(doubanfm):
+
+channel_info = u'''
+    0  私人兆赫
+    1  华语兆赫
+    2  欧美兆赫
+    3  70兆赫
+    4  80兆赫
+    5  90兆赫
+    6  粤语兆赫
+    7  摇滚兆赫
+    8  轻音乐兆赫
+    9  民谣兆赫
+'''
+print channel_info    
+c = raw_input('请输入您想听的频道数字:')
+doubanfm = DoubanFM_CLI(c)
+use_info = u'''
+    跳过输入n，加心输入f，删歌输入d
+'''
+print use_info
+while 1:
     thread.start_new_thread(doubanfm.start, ())
     gobject.threads_init()
     loop = glib.MainLoop()
     loop.run()
-    thread.exit()
 
-def main():
-    channel_info = u'''
-        0  私人兆赫
-        1  华语兆赫
-        2  欧美兆赫
-        3  70兆赫
-        4  80兆赫
-        5  90兆赫
-        6  粤语兆赫
-        7  摇滚兆赫
-        8  轻音乐兆赫
-        9  民谣兆赫
-    '''
-    print channel_info    
-    c = raw_input('请输入您想听的频道数字:')
-    doubanfm = DoubanFM_CLI(c)
-    use_info = u'''
-        跳过输入n，加心输入f，删歌输入d
-    '''
-    print use_info
-    while 1:
-        fm(doubanfm)
-
-main()
