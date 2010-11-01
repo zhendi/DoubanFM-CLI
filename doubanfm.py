@@ -96,7 +96,8 @@ class DoubanFM_CLI:
             self.songlist = self.user.playlist()
         elif self.private:
             self.username = raw_input("请输入豆瓣登录账户：") 
-            self.password = raw_input("请输入豆瓣登录密码：") 
+            import getpass
+            self.password = getpass.getpass("请输入豆瓣登录密码：") 
             self.user = PrivateFM(self.username, self.password)
             self.songlist = self.user.playlist()
         else:
