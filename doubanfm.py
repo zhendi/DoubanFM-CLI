@@ -143,8 +143,8 @@ channel_info = u'''
     5  90兆赫
     6  粤语兆赫
     7  摇滚兆赫
-    8  民谣兆赫
-    9  轻音乐兆赫
+    8  轻音乐兆赫
+    9  民谣兆赫
 '''
 print channel_info    
 c = raw_input('请输入您想听的频道数字:')
