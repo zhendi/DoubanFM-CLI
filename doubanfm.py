@@ -18,6 +18,10 @@ class PrivateFM(object):
         with contextlib.closing(httplib.HTTPConnection("www.douban.com")) as conn:
             conn.request("POST", "/accounts/login", data, {"Content-Type":"application/x-www-form-urlencoded"})
             cookie = SimpleCookie(conn.getresponse().getheader('Set-Cookie'))
+            if not cookie.has_key('dbcl2'):
+                print 'login failed'
+                thread.exit()
+                return 
             dbcl2 = cookie['dbcl2'].value
             if dbcl2 and len(dbcl2) > 0:
                 self.dbcl2 = dbcl2
@@ -134,30 +138,34 @@ class DoubanFM_CLI:
                     break 
         loop.quit()
         
-
-channel_info = u'''
-    0  私人兆赫
-    1  华语兆赫
-    2  欧美兆赫
-    3  70兆赫
-    4  80兆赫
-    5  90兆赫
-    6  粤语兆赫
-    7  摇滚兆赫
-    8  轻音乐兆赫
-    9  民谣兆赫
-'''
-print channel_info    
-c = raw_input('请输入您想听的频道数字:')
-doubanfm = DoubanFM_CLI(c)
-use_info = u'''
-    跳过输入n，加心输入f，删歌输入d
-'''
-print use_info
-while 1:
+def fm(doubanfm):
     thread.start_new_thread(doubanfm.start, ())
     gobject.threads_init()
     loop = glib.MainLoop()
     loop.run()
+    thread.exit()
 
+def main():
+    channel_info = u'''
+        0  私人兆赫
+        1  华语兆赫
+        2  欧美兆赫
+        3  70兆赫
+        4  80兆赫
+        5  90兆赫
+        6  粤语兆赫
+        7  摇滚兆赫
+        8  轻音乐兆赫
+        9  民谣兆赫
+    '''
+    print channel_info    
+    c = raw_input('请输入您想听的频道数字:')
+    doubanfm = DoubanFM_CLI(c)
+    use_info = u'''
+        跳过输入n，加心输入f，删歌输入d
+    '''
+    print use_info
+    while 1:
+        fm(doubanfm)
 
+main()
