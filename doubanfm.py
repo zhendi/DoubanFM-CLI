@@ -7,6 +7,7 @@ pygst.require("0.10")
 import gst, json, urllib, httplib, contextlib, random
 from select import select
 from Cookie import SimpleCookie
+from contextlib import closing 
 
 class PrivateFM(object):
     def __init__ (self, username, password):
@@ -15,7 +16,7 @@ class PrivateFM(object):
     
     def login(self, username, password):
         data = urllib.urlencode({'form_email':username, 'form_password':password})
-        with contextlib.closing(httplib.HTTPConnection("www.douban.com")) as conn:
+        with closing(httplib.HTTPConnection("www.douban.com")) as conn:
             conn.request("POST", "/accounts/login", data, {"Content-Type":"application/x-www-form-urlencoded"})
             cookie = SimpleCookie(conn.getresponse().getheader('Set-Cookie'))
             if not cookie.has_key('dbcl2'):
@@ -41,7 +42,7 @@ class PrivateFM(object):
         data = urllib.urlencode(params)
         cookie = 'dbcl2="%s"; bid="%s"' % (self.dbcl2, self.bid)
         header = {"Cookie": cookie}
-        with contextlib.closing(httplib.HTTPConnection("douban.fm")) as conn:
+        with closing(httplib.HTTPConnection("douban.fm")) as conn:
             conn.request('GET', "/j/mine/playlist?"+data, None, header)
             result = conn.getresponse().read()
             return result
@@ -82,7 +83,7 @@ class DoubanFM_CLI:
         bus = self.player.get_bus()
         bus.add_signal_watch()
         bus.connect("message", self.on_message)
-        self.ch = 'http://douban.fm/j/mine/playlist?channel='+channel
+        self.ch = 'http://douban.fm/j/mine/playlist?type=p&sid=&channel='+channel
 
     def on_message(self, bus, message):
         t = message.type
