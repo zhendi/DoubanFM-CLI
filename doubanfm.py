@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, time, thread, glib, gobject
+import pickle
 import pygst
 pygst.require("0.10")
 import gst, json, urllib, httplib, contextlib, random
@@ -100,13 +101,40 @@ class DoubanFM_CLI:
         if self.user:
             self.songlist = self.user.playlist()
         elif self.private:
-            self.username = raw_input("请输入豆瓣登录账户：") 
-            import getpass
-            self.password = getpass.getpass("请输入豆瓣登录密码：") 
+            self.get_user_name_pass()
             self.user = PrivateFM(self.username, self.password)
             self.songlist = self.user.playlist()
         else:
             self.songlist = json.loads(urllib.urlopen(self.ch).read())['song']
+
+    def get_user_name_pass(self):
+        self.user_name_pass_cache_file_name = 'cache_info'
+        info = self.get_user_name_pass_cache()
+        if info is None:
+            self.get_user_input_name_pass()
+            info = {'username': self.username, 'password': self.password}
+            self.set_user_name_pass_cache(info)
+        else:
+            self.username = info['username']
+            self.password = info['password']
+
+    def set_user_name_pass_cache(self, info):
+        cache_file = open(self.user_name_pass_cache_file_name, 'wb')
+        pickle.dump(info, cache_file)
+        cache_file.close()
+
+    def get_user_name_pass_cache(self):
+        if not os.path.exists(self.user_name_pass_cache_file_name):
+            return None
+        cache_file = open(self.user_name_pass_cache_file_name, 'rb')
+        info = pickle.load(cache_file)
+        cache_file.close()
+        return info
+
+    def get_user_input_name_pass(self):
+        self.username = raw_input("请输入豆瓣登录账户：") 
+        import getpass
+        self.password = getpass.getpass("请输入豆瓣登录密码：") 
 
     def control(self,r):
         rlist, _, _ = select([sys.stdin], [], [], 1)
