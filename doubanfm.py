@@ -5,7 +5,7 @@ import sys, os, time, thread, glib, gobject
 import pickle
 import pygst
 pygst.require("0.10")
-import gst, json, urllib, httplib, contextlib, random
+import gst, json, urllib, httplib, contextlib, random, binascii
 from select import select
 from Cookie import SimpleCookie
 from contextlib import closing 
@@ -13,10 +13,24 @@ from contextlib import closing
 class PrivateFM(object):
     def __init__ (self, username, password):
         self.dbcl2 = None
+        print 'get cookie from file...'
+        self.cookie = self.get_cache('cookie', {})
+
         self.login(username, password)
     
     def login(self, username, password):
-        data = urllib.urlencode({'form_email':username, 'form_password':password})
+        print u'正在登录...'
+        print {'form_email':username, 'form_password':password}
+        print "/accounts/login"
+        data = {
+                'source': 'radio',
+                'alias': username, 
+                'form_password': password
+                }
+        captcha = self.get_captcha_solution()
+        return
+        data = urllib.urlencode()
+        print data
         with closing(httplib.HTTPConnection("www.douban.com")) as conn:
             conn.request("POST", "/accounts/login", data, {"Content-Type":"application/x-www-form-urlencoded"})
             cookie = SimpleCookie(conn.getresponse().getheader('Set-Cookie'))
@@ -29,6 +43,96 @@ class PrivateFM(object):
                 self.dbcl2 = dbcl2
                 self.uid = self.dbcl2.split(':')[0]
             self.bid = cookie['bid'].value
+
+    def get_captcha_solution(self):
+        self.show_captcha_image()
+        print 'get'
+
+    def get_fm_conn(self):
+        return httplib.HTTPConnection("douban.fm")
+
+    def show_captcha_image(self):
+        captcha_id = self.get_captcha_id()
+        print captcha_id
+        
+        with closing(self.get_fm_conn()) as conn:
+            print '========================'
+            print 'fetching captcha image...'
+            path = "/misc/captcha?size=m&id=" + captcha_id
+            print path
+            
+            headers = self.get_headers_for_request()
+
+            conn.request("GET", path, None, headers)
+            response = conn.getresponse()
+            print response.status
+
+            set_cookie = response.getheader('Set-Cookie')
+            if not set_cookie is None:
+                cookie = SimpleCookie(set_cookie)
+                self.save_cookie(cookie)
+
+            if response.status == 200:
+                body = response.read()
+                print body
+
+                from PIL import Image
+                r_data = binascii.unhexlify(body)
+
+                stream = io.BytesIO(r_data)
+
+                img = Image.open(stream)
+                img.show();
+
+
+    def get_headers_for_request(self):
+        headers = {
+            'Connection': 'keep-alive',
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'X-Requested-With': 'XMLHttpRequest',
+            'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/28.0.1500.71 Chrome/28.0.1500.71 Safari/537.36',
+            'Referer': 'http://douban.fm/',
+            'Accept-Language': 'zh-CN,zh;q=0.8'
+        }
+        if self.cookie:
+            cookie_str = self.get_cookie_for_request()
+            headers['Cookie'] = cookie_str
+        return headers
+
+    def get_captcha_id(self, path = "/j/new_captcha"):
+        with closing(self.get_fm_conn()) as conn:
+            print 'fetching captcha id...'
+
+            headers = self.get_headers_for_request()
+
+            conn.request("GET", path, None, headers)
+            response = conn.getresponse()
+            print response.status
+
+            set_cookie = response.getheader('Set-Cookie')
+            if not set_cookie is None:
+                cookie = SimpleCookie(set_cookie)
+                self.save_cookie(cookie)
+
+            if response.status == 302:
+                redirect_url = response.getheader('location')
+                return self.get_captcha_id(redirect_url)
+            if response.status == 200:
+                body = response.read()
+                return body.strip('"')
+
+    def save_cookie(self, cookie):
+        for key in cookie:
+            # todo expire
+            self.cookie[key] = cookie[key].value
+        self.set_cache('cookie', self.cookie)
+
+    def get_cookie_for_request(self):
+        cookie_segments = []
+        for key in self.cookie:
+            cookie_segment = key + '="' + self.cookie[key] + '"'
+            cookie_segments.append(cookie_segment)
+        return '; '.join(cookie_segments)
   
     def get_params(self, typename=None):
         params = {}
@@ -40,6 +144,8 @@ class PrivateFM(object):
         return params
 
     def communicate(self, params):
+        print 'communicate'
+        print params
         data = urllib.urlencode(params)
         cookie = 'dbcl2="%s"; bid="%s"' % (self.dbcl2, self.bid)
         header = {"Cookie": cookie}
@@ -103,6 +209,7 @@ class DoubanFM_CLI:
         elif self.private:
             self.get_user_name_pass()
             self.user = PrivateFM(self.username, self.password)
+            return
             self.songlist = self.user.playlist()
         else:
             self.songlist = json.loads(urllib.urlopen(self.ch).read())['song']
@@ -131,6 +238,24 @@ class DoubanFM_CLI:
         cache_file.close()
         return info
 
+    def get_cache(self, name, default = None):
+        file_name = self.get_cache_file_name(name)
+        if not os.path.exists(file_name):
+            return default
+        cache_file = open(file_name, 'rb')
+        i = pickle.load(cache_file)
+        cache_file.close()
+        return i
+
+    def set_cache(self, name, content):
+        file_name = self.get_cache_file_name(name)
+        cache_file = open(file_name, 'wb')
+        pickle.dump(content, cache_file)
+        cache_file.close()
+
+    def get_cache_file_name(self, name):
+        return name + '.cache'
+
     def get_user_input_name_pass(self):
         self.username = raw_input("请输入豆瓣登录账户：") 
         import getpass
@@ -153,6 +278,7 @@ class DoubanFM_CLI:
 
     def start(self):
         self.get_songlist()
+        return
         for r in self.songlist:
             song_uri = r['url']
             self.playmode = True
