@@ -27,22 +27,21 @@ class PrivateFM(object):
                 'source': 'radio',
                 'alias': username, 
                 'form_password': password,
-                'remember': 'on'
+                'remember': 'on',
+                'task': 'sync_channel_list'
                 }
-        captcha = 'aaaa'
-        captcha = self.get_captcha_solution()
-        print 'captcha:'
-        print captcha
+        captcha_id = self.get_captcha_id()
+        captcha = self.get_captcha_solution(captcha_id)
+        data['captcha_id'] = captcha_id
         data['captcha_solution'] = captcha
         data = urllib.urlencode(data)
-        print data
-        with closing(httplib.HTTPConnection("www.douban.com")) as conn:
+        print 'login ...'
+        with closing(self.get_fm_conn()) as conn:
             headers = self.get_headers_for_request({
                 'Origin': 'http://douban.fm',
                 'Content-Type': 'application/x-www-form-urlencoded',
             })
-            print headers
-            conn.request("POST", "/accounts/login", data, headers)
+            conn.request("POST", "/j/login", data, headers)
             response = conn.getresponse()
 
             set_cookie = response.getheader('Set-Cookie')
@@ -67,17 +66,15 @@ class PrivateFM(object):
                 self.uid = self.dbcl2.split(':')[0]
             self.bid = cookie['bid'].value
 
-    def get_captcha_solution(self):
-        self.show_captcha_image()
+    def get_captcha_solution(self, captcha_id):
+        self.show_captcha_image(captcha_id)
         c = raw_input('captcha:')
         return c
 
     def get_fm_conn(self):
         return httplib.HTTPConnection("douban.fm")
 
-    def show_captcha_image(self):
-        captcha_id = self.get_captcha_id()
-        
+    def show_captcha_image(self, captcha_id):
         with closing(self.get_fm_conn()) as conn:
             print 'fetching captcha image...'
             path = "/misc/captcha?size=m&id=" + captcha_id
