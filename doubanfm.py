@@ -42,7 +42,6 @@ class DoubanFM_CLI:
         elif self.private:
             self.get_user_name_pass()
             self.user = PrivateFM(self.username, self.password)
-            return
             self.songlist = self.user.playlist()
         else:
             self.songlist = json.loads(urllib.urlopen(self.ch).read())['song']
@@ -93,8 +92,6 @@ class DoubanFM_CLI:
 
     def start(self):
         self.get_songlist()
-        return
-        loop.quit()
         for r in self.songlist:
             song_uri = r['url']
             self.playmode = True

@@ -30,41 +30,39 @@ class PrivateFM(object):
                 'remember': 'on',
                 'task': 'sync_channel_list'
                 }
-        captcha_id = self.get_captcha_id()
-        captcha = self.get_captcha_solution(captcha_id)
-        data['captcha_id'] = captcha_id
-        data['captcha_solution'] = captcha
-        data = urllib.urlencode(data)
+        # captcha_id = self.get_captcha_id()
+        # captcha = self.get_captcha_solution(captcha_id)
+        # data['captcha_id'] = captcha_id
+        # data['captcha_solution'] = captcha
+        # data = urllib.urlencode(data)
         print 'login ...'
         with closing(self.get_fm_conn()) as conn:
-            headers = self.get_headers_for_request({
-                'Origin': 'http://douban.fm',
-                'Content-Type': 'application/x-www-form-urlencoded',
-            })
-            conn.request("POST", "/j/login", data, headers)
-            response = conn.getresponse()
+            # headers = self.get_headers_for_request({
+            #     'Origin': 'http://douban.fm',
+            #     'Content-Type': 'application/x-www-form-urlencoded',
+            # })
+            # conn.request("POST", "/j/login", data, headers)
+            # response = conn.getresponse()
 
-            set_cookie = response.getheader('Set-Cookie')
-            print 'set_cookie:'
-            print set_cookie
-            if not set_cookie is None:
-                cookie = SimpleCookie(set_cookie)
-                self.save_cookie(cookie)
+            # set_cookie = response.getheader('Set-Cookie')
+            # if not set_cookie is None:
+            #     cookie = SimpleCookie(set_cookie)
+            #     self.save_cookie(cookie)
 
-            print response.status
-            body = response.read();
-            print body
-            raw_input('stop')
-
-            if not cookie.has_key('dbcl2'):
+            # print response.status
+            # body = response.read();
+            body = '{"user_info":{"ck":"0-jp","play_record":{"fav_chls_count":7,"liked":418,"banned":100,"played":9954},"is_new_user":0,"uid":"xiaochi2","third_party_info":null,"url":"http:\/\/www.douban.com\/people\/xiaochi2\/","is_dj":false,"id":"2778286","is_pro":false,"name":"小池·水"},"r":0}'
+            body = json.loads(body)
+            if body['r'] != 0:
                 print 'login failed'
                 thread.exit()
                 return 
-            dbcl2 = cookie['dbcl2'].value
+            print 'ok'
+            dbcl2 = self.cookie['dbcl2'].value
             if dbcl2 and len(dbcl2) > 0:
                 self.dbcl2 = dbcl2
                 self.uid = self.dbcl2.split(':')[0]
-            self.bid = cookie['bid'].value
+            self.bid = self.cookie['bid'].value
 
     def get_captcha_solution(self, captcha_id):
         self.show_captcha_image(captcha_id)
