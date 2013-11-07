@@ -23,7 +23,6 @@ class PrivateFM(object):
     
     def login(self, username, password):
         print u'正在登录...'
-        print "/accounts/login"
         data = {
                 'source': 'radio',
                 'alias': username, 
@@ -32,7 +31,6 @@ class PrivateFM(object):
                 }
         captcha = 'aaaa'
         captcha = self.get_captcha_solution()
-        return
         print 'captcha:'
         print captcha
         data['captcha_solution'] = captcha
@@ -57,7 +55,7 @@ class PrivateFM(object):
             print response.status
             body = response.read();
             print body
-            return
+            raw_input('stop')
 
             if not cookie.has_key('dbcl2'):
                 print 'login failed'
@@ -71,7 +69,6 @@ class PrivateFM(object):
 
     def get_captcha_solution(self):
         self.show_captcha_image()
-        print 'get'
         c = raw_input('captcha:')
         return c
 
@@ -123,6 +120,7 @@ class PrivateFM(object):
         return headers
 
     def get_captcha_id(self, path = "/j/new_captcha"):
+        print 'fetching captcha id ...'
         with closing(self.get_fm_conn()) as conn:
 
             headers = self.get_headers_for_request()
@@ -134,6 +132,8 @@ class PrivateFM(object):
             if not set_cookie is None:
                 cookie = SimpleCookie(set_cookie)
                 self.save_cookie(cookie)
+
+            print response.status
 
             if response.status == 302:
                 redirect_url = response.getheader('location')
