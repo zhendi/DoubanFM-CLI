@@ -198,14 +198,6 @@ class PrivateFM(object):
         print 'fetching playlist ...'
         params = self.get_params('n')
         result = self.communicate(params)
-        print json.loads(result)['r']
-        songs = json.loads(result)['song']
-        for s in songs:
-            print "\t" + s['title']+' ['+s['artist']+"]\t",
-            if s['like']:
-                print u'♥'
-            else:
-                print u'x'
         return json.loads(result)['song']
      
     def del_song(self, sid, aid):
