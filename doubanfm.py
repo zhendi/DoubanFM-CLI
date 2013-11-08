@@ -95,7 +95,11 @@ class DoubanFM_CLI:
         for r in self.songlist:
             song_uri = r['url']
             self.playmode = True
-            print u'正在播放： '+r['title']+u'     歌手： '+r['artist']
+            print u'正在播放： '+r['title']+u'     歌手： '+r['artist']+'    ',
+            if r['like']:
+                print u'♥'
+            else:
+                print u'x'
             self.player.set_property("uri", song_uri)
             self.player.set_state(gst.STATE_PLAYING)
             while self.playmode:
