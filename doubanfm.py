@@ -15,7 +15,8 @@ class DoubanFM_CLI:
     def __init__(self, channel):
         self.user = None
         self.username = ''
-        if channel == '0':
+        self.channel = channel
+        if channel == '0' or channel == '-3':
             self.private = True
         else:
             self.private = False
@@ -41,7 +42,7 @@ class DoubanFM_CLI:
             self.songlist = self.user.playlist()
         elif self.private:
             self.get_user_name_pass()
-            self.user = PrivateFM(self.username, self.password)
+            self.user = PrivateFM(self.channel)
             self.songlist = self.user.playlist()
         else:
             self.songlist = json.loads(urllib.urlopen(self.ch).read())['song']
@@ -87,6 +88,7 @@ class DoubanFM_CLI:
         loop.quit()
 
 channel_info = u'''
+   -3  红心兆赫
     0  私人兆赫
     1  华语兆赫
     2  欧美兆赫
@@ -99,13 +101,12 @@ channel_info = u'''
     9  民谣兆赫
 '''
 print channel_info
-# c = raw_input('请输入您想听的频道数字:')
-c = '0'
+c = raw_input('请输入您想听的频道数字:')
 doubanfm = DoubanFM_CLI(c)
 use_info = u'''
     跳过输入n，加心输入f，删歌输入d
 '''
-#print use_info
+print use_info
 while 1:
     # doubanfm.start()
     # break

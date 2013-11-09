@@ -11,18 +11,19 @@ from Cookie import SimpleCookie
 from contextlib import closing 
 
 class PrivateFM(object):
-    def __init__ (self, username, password):
+    def __init__ (self, channel):
         # todo this method should not have params
+        self.channel = channel
         self.dbcl2 = None
         self.init_cookie()
-        self.login(username, password)
+        self.login()
 
     def init_cookie(self):
         self.cookie = {}
         cookie = self.get_cache('cookie', {})
         self.merge_cookie(cookie)
     
-    def login(self, username, password):
+    def login(self):
         if self.remember_cookie():
             self.login_from_cookie()
         else:
@@ -85,7 +86,7 @@ class PrivateFM(object):
 
     def get_captcha_solution(self, captcha_id):
         self.show_captcha_image(captcha_id)
-        c = raw_input('captcha:')
+        c = raw_input('验证码: ')
         return c
 
     def get_fm_conn(self):
@@ -186,7 +187,7 @@ class PrivateFM(object):
         params = {}
         params['r'] = ''.join(random.sample('0123456789abcdefghijklmnopqrstuvwxyz0123456789', 10))
         params['uid'] = self.uid
-        params['channel'] = '-3' 
+        params['channel'] = self.channel
         params['from'] = 'mainsite'
         if typename is not None:
             params['type'] = typename
