@@ -54,6 +54,8 @@ class PrivateFM(object):
                 'remember': 'on',
                 'task': 'sync_channel_list'
                 }
+        # the flow of geting captcha should be invisibe to user
+        # so, we should only show one message of geting captha image
         captcha_id = self.get_captcha_id()
         captcha = self.get_captcha_solution(captcha_id)
         data['captcha_id'] = captcha_id
