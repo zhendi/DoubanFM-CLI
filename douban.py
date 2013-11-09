@@ -12,6 +12,7 @@ from contextlib import closing
 
 class PrivateFM(object):
     def __init__ (self, username, password):
+        # todo this method should not have params
         self.dbcl2 = None
         self.init_cookie()
         self.login(username, password)
@@ -76,6 +77,7 @@ class PrivateFM(object):
             body = json.loads(body)
             if body['r'] != 0:
                 print 'login failed'
+                print body['err_msg']
                 thread.exit()
                 return 
             print 'ok'
