@@ -98,7 +98,7 @@ channel_info = u'''
     8  轻音乐兆赫
     9  民谣兆赫
 '''
-#print channel_info    
+print channel_info
 # c = raw_input('请输入您想听的频道数字:')
 c = '0'
 doubanfm = DoubanFM_CLI(c)
@@ -107,10 +107,10 @@ use_info = u'''
 '''
 #print use_info
 while 1:
-    doubanfm.start()
-    break
-    # thread.start_new_thread(doubanfm.start, ())
-    # gobject.threads_init()
-    # loop = glib.MainLoop()
-    # loop.run()
+    # doubanfm.start()
+    # break
+    thread.start_new_thread(doubanfm.start, ())
+    gobject.threads_init()
+    loop = glib.MainLoop()
+    loop.run()
 
