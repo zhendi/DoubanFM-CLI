@@ -151,6 +151,7 @@ class PrivateFM(object):
             print response.status
 
             if response.status == 302:
+                print u'第一次获取时，有几次302是正常的，请耐心等待'
                 redirect_url = response.getheader('location')
                 return self.get_captcha_id(redirect_url)
             if response.status == 200:
