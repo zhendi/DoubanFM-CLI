@@ -25,7 +25,13 @@ class PrivateFM(object):
         if self.remember_cookie():
             self.login_from_cookie()
         else:
-            self.login_from_net(username, password)
+            self.get_user_input_name_pass()
+            self.login_from_net(self.username, self.password)
+
+    def get_user_input_name_pass(self):
+        self.username = raw_input("请输入豆瓣登录账户：") 
+        import getpass
+        self.password = getpass.getpass("请输入豆瓣登录密码：")
 
     def remember_cookie(self):
         return 'dbcl2' in self.cookie and 'bid' in self.cookie

@@ -47,33 +47,9 @@ class DoubanFM_CLI:
             self.songlist = json.loads(urllib.urlopen(self.ch).read())['song']
 
     def get_user_name_pass(self):
-        self.user_name_pass_cache_file_name = 'cache_info'
-        info = self.get_user_name_pass_cache()
-        if info is None:
-            self.get_user_input_name_pass()
-            info = {'username': self.username, 'password': self.password}
-            self.set_user_name_pass_cache(info)
-        else:
-            self.username = info['username']
-            self.password = info['password']
-
-    def set_user_name_pass_cache(self, info):
-        cache_file = open(self.user_name_pass_cache_file_name, 'wb')
-        pickle.dump(info, cache_file)
-        cache_file.close()
-
-    def get_user_name_pass_cache(self):
-        if not os.path.exists(self.user_name_pass_cache_file_name):
-            return None
-        cache_file = open(self.user_name_pass_cache_file_name, 'rb')
-        info = pickle.load(cache_file)
-        cache_file.close()
-        return info
-
-    def get_user_input_name_pass(self):
-        self.username = raw_input("请输入豆瓣登录账户：") 
-        import getpass
-        self.password = getpass.getpass("请输入豆瓣登录密码：") 
+        # todo we should del this method
+        self.username = ''
+        self.password = ''
 
     def control(self,r):
         rlist, _, _ = select([sys.stdin], [], [], 1)
