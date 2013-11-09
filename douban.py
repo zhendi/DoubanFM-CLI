@@ -193,9 +193,6 @@ class PrivateFM(object):
         return params
 
     def communicate(self, params):
-        print 'communicate'
-        print '/j/mine/playlist'
-        print params
         data = urllib.urlencode(params)
         with closing(httplib.HTTPConnection("douban.fm")) as conn:
             conn.request('GET', "/j/mine/playlist?"+data, None, self.get_headers_for_request())
