@@ -14,8 +14,8 @@ from contextlib import closing
 
 class PrivateFM(object):
     def __init__ (self, channel):
-        # todo this method should not have params
         self.channel = channel
+        # todo remove this var
         self.dbcl2 = None
         self.init_cookie()
         self.login()
@@ -40,6 +40,7 @@ class PrivateFM(object):
     def remember_cookie(self):
         return 'dbcl2' in self.cookie and 'bid' in self.cookie
 
+    # todo remove this method
     def login_from_cookie(self):
         dbcl2 = self.cookie['dbcl2'].value
         if dbcl2 and len(dbcl2) > 0:
@@ -166,6 +167,8 @@ class PrivateFM(object):
         self.merge_cookie(cookie)
         self.set_cache('cookie', self.cookie)
 
+    # maybe we should extract a class XcCookie(SimpleCookie)
+    # merge(SimpleCookie)
     def merge_cookie(self, cookie):
         for key in cookie:
             expires = cookie[key]['expires']
@@ -181,6 +184,7 @@ class PrivateFM(object):
             else:
                 self.cookie[key] = cookie[key]
 
+    # todo XcCookie.get_request_string()
     def get_cookie_for_request(self):
         cookie_segments = []
         for key in self.cookie:
@@ -230,7 +234,7 @@ class PrivateFM(object):
         params['aid'] = aid
         self.communicate(params)
         
-    # todo this should use Cache
+    # todo should use Cache
     def get_cache(self, name, default = None):
         file_name = self.get_cache_file_name(name)
         if not os.path.exists(file_name):
