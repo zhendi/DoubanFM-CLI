@@ -16,7 +16,6 @@ class DoubanFM_CLI:
         config = ConfigParser.SafeConfigParser({'interval': '0'})
         config.read('doubanfm.config')
         self.delay_after_every_song = config.getfloat('DEFAULT', 'interval')
-        print self.delay_after_every_song
         self.skip_mode = False
         self.user = None
         self.username = ''
