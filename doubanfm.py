@@ -58,15 +58,15 @@ class DoubanFM_CLI:
         if rlist:
             s = sys.stdin.readline()
             if s[0] == 'n':
-                # print 'next'
+                print '下一首...'
                 return 'next'
             elif s[0] == 'f' and self.private:
-                # print 'fav'
+                print '正在加心...'
                 self.user.fav_song(r['sid'], r['aid'])
                 print "加心成功:)"
                 return 'fav'
             elif s[0] == 'd' and self.private:
-                # print 'never listen'
+                print '不再收听...'
                 self.songlist = self.user.del_song(r['sid'], r['aid'])
                 print "删歌成功:)"
                 return 'del'
