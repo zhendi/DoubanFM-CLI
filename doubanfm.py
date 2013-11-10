@@ -136,6 +136,7 @@ class Channel:
         for id, name in self.info.items():
             print("%15s   %s" % (id, name))
 
+# this class should have a file
 class Cache:
     """docstring for cache"""
     def has(self, name):
@@ -158,6 +159,8 @@ class Cache:
         cache_file.close()
 
     def get_cache_file_name(self, name):
+        # file should put to /tmp ?
+        # but maybe someone clear their /tmp everyday ?
         return name + '.cache'
 
 def main():

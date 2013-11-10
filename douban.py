@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# this file should rename to douban_fm_lib.py and should only have net functions
+
 import sys, os, time, thread, glib, gobject, datetime
 import pickle
 import pygst
@@ -228,6 +230,7 @@ class PrivateFM(object):
         params['aid'] = aid
         self.communicate(params)
         
+    # todo this should use Cache
     def get_cache(self, name, default = None):
         file_name = self.get_cache_file_name(name)
         if not os.path.exists(file_name):
