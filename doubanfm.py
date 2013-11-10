@@ -14,6 +14,7 @@ from douban import PrivateFM
 class DoubanFM_CLI:
     def __init__(self, channel):
         self.delay_after_every_song = 3
+        self.skip_mode = False
         self.user = None
         self.username = ''
         self.channel = channel
@@ -59,6 +60,7 @@ class DoubanFM_CLI:
             s = sys.stdin.readline()
             if s[0] == 'n':
                 print '下一首...'
+                self.skip_mode = True
                 return 'next'
             elif s[0] == 'f' and self.private:
                 print '正在加心...'
@@ -78,7 +80,7 @@ class DoubanFM_CLI:
             song_uri = r['url']
             self.playmode = True
 
-            if not is_first_song:
+            if not is_first_song and not self.skip_mode:
                 print 'sleep'
                 time.sleep(self.delay_after_every_song)
             is_first_song = False
