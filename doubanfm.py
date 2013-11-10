@@ -13,6 +13,8 @@ from douban import PrivateFM
 
 class DoubanFM_CLI:
     def __init__(self, channel):
+        self.delay_after_every_song = 3
+        self.skip_mode = False
         self.user = None
         self.username = ''
         self.channel = channel
@@ -57,26 +59,39 @@ class DoubanFM_CLI:
         if rlist:
             s = sys.stdin.readline()
             if s[0] == 'n':
+                print '下一首...'
+                self.skip_mode = True
                 return 'next'
             elif s[0] == 'f' and self.private:
+                print '正在加心...'
                 self.user.fav_song(r['sid'], r['aid'])
                 print "加心成功:)"
                 return 'fav'
             elif s[0] == 'd' and self.private:
+                print '不再收听...'
                 self.songlist = self.user.del_song(r['sid'], r['aid'])
                 print "删歌成功:)"
                 return 'del'
 
     def start(self):
         self.get_songlist()
+        is_first_song = True
         for r in self.songlist:
             song_uri = r['url']
             self.playmode = True
-            print u'正在播放： '+r['title']+u'     歌手： '+r['artist']+'    ',
+
+            if not is_first_song and not self.skip_mode:
+                print 'sleep'
+                time.sleep(self.delay_after_every_song)
+            is_first_song = False
+
+            # print_playing()
+            print u'正在播放： '+r['title']+u'     歌手： '+r['artist'],
             if r['like']:
-                print u'♥'
+                print u'    ♥'
             else:
-                print u'x'
+                print
+
             self.player.set_property("uri", song_uri)
             self.player.set_state(gst.STATE_PLAYING)
             while self.playmode:
