@@ -116,14 +116,15 @@ class Channel:
             self.info = cache.get('channel')
         else:
             self.info = {
-                    "0": "私人",
-                    "-3": "红心"
+                    0: "私人",
+                    -3: "红心"
                 }
             self.get_id_and_name()
             cache.set('channel', self.info)
 
     def get_id_and_name(self):
         print 'fetching channel list ...'
+        # this var should name to text or string or something
         self.html = urllib2.urlopen(self.url).read()
         chls = json.loads(self.html)["data"]["channel"]["creator"]["chls"]
         for chl in chls:
@@ -133,8 +134,8 @@ class Channel:
 
     def show(self):
         print u'频道列表：'
-        for id, name in self.info.items():
-            print("%15s   %s" % (id, name))
+        for i in sorted(self.info.iterkeys()):
+            print("%8s %s" % (i, self.info[i]))
 
 # this class should have a file
 class Cache:
