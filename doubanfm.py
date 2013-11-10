@@ -106,15 +106,24 @@ class DoubanFM_CLI:
 class Channel:
 
     def __init__(self):
-        cid = "101"
+        cid = "101" # why cid is 101 ?
         self.url = "http://douban.fm/j/explore/channel_detail?channel_id=" + cid
-        self.info = {
-                "0": "私人",
-                "-3": "红心"
-            }
-        self.get_id_and_name()
+        self.init_info()
+
+    def init_info(self):
+        cache = Cache()
+        if cache.has('channel'):
+            self.info = cache.get('channel')
+        else:
+            self.info = {
+                    "0": "私人",
+                    "-3": "红心"
+                }
+            self.get_id_and_name()
+            cache.set('channel', self.info)
 
     def get_id_and_name(self):
+        print 'fetching channel list ...'
         self.html = urllib2.urlopen(self.url).read()
         chls = json.loads(self.html)["data"]["channel"]["creator"]["chls"]
         for chl in chls:
@@ -123,10 +132,23 @@ class Channel:
             self.info[id] = name
 
     def show(self):
+        print u'频道列表：'
         for id, name in self.info.items():
             print("%15s   %s" % (id, name))
 
+class Cache:
+    """docstring for cache"""
+    def has(self, key):
+        return False
+    
+    def get(self, key):
+        pass
+
+    def set(self, key, value):
+        pass
+
 def main():
+    print u'豆瓣电台'
     Channel().show()
     c = raw_input('请输入您想听的频道数字:')
     print u"\r\n\t跳过输入n，加心输入f，删歌输入d\r\n"
