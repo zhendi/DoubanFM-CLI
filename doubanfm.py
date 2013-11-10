@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, os, time, thread, glib, gobject
+import sys, os, time, thread, glib, gobject, re
 import pickle
 import pygst
 pygst.require("0.10")
-import gst, json, urllib, httplib, contextlib, random, binascii
+import gst, json, urllib, urllib2, httplib, contextlib, random, binascii
 from select import select
 from Cookie import SimpleCookie
-from contextlib import closing 
+from contextlib import closing
 from douban import PrivateFM
 
 class DoubanFM_CLI:
@@ -84,34 +84,49 @@ class DoubanFM_CLI:
                 if c == 'next' or c == 'del':
                     self.player.set_state(gst.STATE_NULL)
                     self.playmode = False
-                    break 
+                    break
         loop.quit()
 
-channel_info = u'''
-   -3  红心兆赫
-    0  私人兆赫
-    1  华语兆赫
-    2  欧美兆赫
-    3  70兆赫
-    4  80兆赫
-    5  90兆赫
-    6  粤语兆赫
-    7  摇滚兆赫
-    8  轻音乐兆赫
-    9  民谣兆赫
-'''
-print channel_info
-c = raw_input('请输入您想听的频道数字:')
-doubanfm = DoubanFM_CLI(c)
-use_info = u'''
-    跳过输入n，加心输入f，删歌输入d
-'''
-print use_info
-while 1:
-    # doubanfm.start()
-    # break
-    thread.start_new_thread(doubanfm.start, ())
-    gobject.threads_init()
-    loop = glib.MainLoop()
-    loop.run()
 
+class Channel:
+
+    def __init__(self):
+        cid = "101"
+        self.url = "http://douban.fm/j/explore/channel_detail?channel_id=" + cid
+        self.info = {
+                "0": "私人",
+                "-3": "红心"
+            }
+        self.get_id_and_name()
+
+    def get_id_and_name(self):
+        self.html = urllib2.urlopen(self.url).read()
+        chls = json.loads(self.html)["data"]["channel"]["creator"]["chls"]
+        for chl in chls:
+            id = chl["id"]
+            name = chl["name"]
+            self.info[id] = name
+
+    def show(self):
+        for id, name in self.info.items():
+            print("%15s   %s" % (id, name))
+
+def main():
+    Channel().show()
+    c = raw_input('请输入您想听的频道数字:')
+    print u"\r\n\t跳过输入n，加心输入f，删歌输入d\r\n"
+    doubanfm = DoubanFM_CLI(c)
+    while 1:
+        # doubanfm.start()
+        # break
+        thread.start_new_thread(doubanfm.start, ())
+        gobject.threads_init()
+        loop = glib.MainLoop()
+        loop.run()
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
