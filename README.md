@@ -32,6 +32,15 @@
 
 (并按Enter键)
 
+**配置**
+
+配置文件名：`doubanfm.config`
+
+```
+[DEFAULT]
+interval:30 ; 歌与歌之间的沉默间隙，单位：秒。默认值：0
+```
+
 **其他**
 
 不支持 Windows 

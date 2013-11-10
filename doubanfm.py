@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, time, thread, glib, gobject, re
-import pickle
+import pickle, ConfigParser
 import pygst
 pygst.require("0.10")
 import gst, json, urllib, urllib2, httplib, contextlib, random, binascii
@@ -13,7 +13,10 @@ from douban import PrivateFM
 
 class DoubanFM_CLI:
     def __init__(self, channel):
-        self.delay_after_every_song = 3
+        config = ConfigParser.SafeConfigParser({'interval': '0'})
+        config.read('doubanfm.config')
+        self.delay_after_every_song = config.getfloat('DEFAULT', 'interval')
+        print self.delay_after_every_song
         self.skip_mode = False
         self.user = None
         self.username = ''
@@ -81,8 +84,10 @@ class DoubanFM_CLI:
             self.playmode = True
 
             if not is_first_song and not self.skip_mode:
-                print 'sleep'
-                time.sleep(self.delay_after_every_song)
+                if self.delay_after_every_song > 0:
+                    print '-'
+                    time.sleep(self.delay_after_every_song)
+                self.skip_mode = False
             is_first_song = False
 
             # print_playing()
