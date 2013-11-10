@@ -138,14 +138,27 @@ class Channel:
 
 class Cache:
     """docstring for cache"""
-    def has(self, key):
-        return False
-    
-    def get(self, key):
-        pass
+    def has(self, name):
+        file_name = self.get_cache_file_name(name)
+        return os.path.exists(file_name)
 
-    def set(self, key, value):
-        pass
+    def get(self, name, default = None):
+        file_name = self.get_cache_file_name(name)
+        if not os.path.exists(file_name):
+            return default
+        cache_file = open(file_name, 'rb')
+        content = pickle.load(cache_file)
+        cache_file.close()
+        return content
+
+    def set(self, name, content):
+        file_name = self.get_cache_file_name(name)
+        cache_file = open(file_name, 'wb')
+        pickle.dump(content, cache_file)
+        cache_file.close()
+
+    def get_cache_file_name(self, name):
+        return name + '.cache'
 
 def main():
     print u'豆瓣电台'
