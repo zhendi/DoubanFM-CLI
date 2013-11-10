@@ -13,7 +13,7 @@ from douban import PrivateFM
 
 class DoubanFM_CLI:
     def __init__(self, channel):
-        self.delay_after_every_song = 10
+        self.delay_after_every_song = 3
         self.user = None
         self.username = ''
         self.channel = channel
@@ -58,12 +58,15 @@ class DoubanFM_CLI:
         if rlist:
             s = sys.stdin.readline()
             if s[0] == 'n':
+                # print 'next'
                 return 'next'
             elif s[0] == 'f' and self.private:
+                # print 'fav'
                 self.user.fav_song(r['sid'], r['aid'])
                 print "加心成功:)"
                 return 'fav'
             elif s[0] == 'd' and self.private:
+                # print 'never listen'
                 self.songlist = self.user.del_song(r['sid'], r['aid'])
                 print "删歌成功:)"
                 return 'del'
