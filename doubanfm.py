@@ -13,7 +13,7 @@ from douban import PrivateFM
 
 class DoubanFM_CLI:
     def __init__(self, channel):
-        self.delay_after_every_song = 1
+        self.delay_after_every_song = 10
         self.user = None
         self.username = ''
         self.channel = channel
@@ -81,11 +81,11 @@ class DoubanFM_CLI:
             is_first_song = False
 
             # print_playing()
-            print u'正在播放： '+r['title']+u'     歌手： '+r['artist']+'    ',
+            print u'正在播放： '+r['title']+u'     歌手： '+r['artist'],
             if r['like']:
-                print u'♥'
+                print u'    ♥'
             else:
-                print u'x'
+                print
 
             self.player.set_property("uri", song_uri)
             self.player.set_state(gst.STATE_PLAYING)
