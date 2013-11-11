@@ -187,6 +187,7 @@ def main():
 
 
 if __name__ == "__main__":
+    loop = None
     try:
         main()
     except KeyboardInterrupt:
