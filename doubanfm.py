@@ -91,15 +91,12 @@ class DoubanFM_CLI:
 
             # print_playing()
             print u'正在播放： '+r['title']+u'     歌手： '+r['artist'],
-            if r['like']:
+            if r['like'] == '1':
                 print u'    ♥'
             else:
                 print
-            # 当播放广告时，看看是什么情况
-            if not r['artist']:
-                print r
 
-            self.player.set_property("uri", song_uri)
+            self.player.set_property("uri", song_uri) # when ads, flv, warning print
             self.player.set_state(gst.STATE_PLAYING)
             while self.playmode:
                 c = self.control(r)
