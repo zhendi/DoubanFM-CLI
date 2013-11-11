@@ -91,7 +91,7 @@ class DoubanFM_CLI:
 
             # print_playing()
             print u'正在播放： '+r['title']+u'     歌手： '+r['artist'],
-            if r['like'] == '1':
+            if int(r['like']) == 1:
                 print u'    ♥'
             else:
                 print
