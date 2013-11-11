@@ -95,6 +95,9 @@ class DoubanFM_CLI:
                 print u'    ♥'
             else:
                 print
+            # 当播放广告时，看看是什么情况
+            if not r['artist']:
+                print r
 
             self.player.set_property("uri", song_uri)
             self.player.set_state(gst.STATE_PLAYING)
