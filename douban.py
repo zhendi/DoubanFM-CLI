@@ -33,7 +33,7 @@ class PrivateFM(object):
             self.login_from_net(self.username, self.password)
 
     def get_user_input_name_pass(self):
-        self.username = raw_input("请输入豆瓣登录账户：") 
+        self.username = raw_input("请输入豆瓣登录账户：")
         import getpass
         self.password = getpass.getpass("请输入豆瓣登录密码：")
 
@@ -81,7 +81,7 @@ class PrivateFM(object):
             print response.status
             body = response.read();
             body = json.loads(body)
-            if body['r'] != 0:
+            if body['r'] != 0: # wonder what is the extra information, we should print some
                 print 'login failed'
                 print body['err_msg']
                 thread.exit()
