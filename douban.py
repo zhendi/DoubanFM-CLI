@@ -173,6 +173,7 @@ class PrivateFM(object):
         for key in cookie:
             expires = cookie[key]['expires']
             if expires:
+                print 'expires:', expires
                 expires = time.strptime(expires, '%a, %d-%b-%Y %H:%M:%S GMT')
                 expires = time.mktime(expires)
                 now = time.time()
