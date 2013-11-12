@@ -86,7 +86,7 @@ class DoubanFM_CLI:
                 if self.delay_after_every_song > 0:
                     print '-'
                     time.sleep(self.delay_after_every_song)
-                self.skip_mode = False
+            self.skip_mode = False
             is_first_song = False
 
             # print_playing()
