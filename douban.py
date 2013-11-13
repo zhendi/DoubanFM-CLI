@@ -81,8 +81,7 @@ class PrivateFM(object):
             print response.status
             body = response.read();
             body = json.loads(body)
-
-            if body['r'] != 0: # wonder what is the extra information, we should print some
+            if body['r'] != 0:
                 print 'login failed'
                 print body['err_msg']
                 thread.exit()
