@@ -104,7 +104,8 @@ class DoubanFM_CLI:
                     self.player.set_state(gst.STATE_NULL)
                     self.playmode = False
                     break
-        loop.quit()
+        if loop is not None:
+            loop.quit()
 
 
 class Channel:
