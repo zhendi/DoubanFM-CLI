@@ -218,7 +218,14 @@ class PrivateFM(object):
         print 'fetching playlist ...'
         params = self.get_params('n')
         result = self.communicate(params)
-        return json.loads(result)['song']
+        result = json.loads(result)
+        if result.has_key('logout') and result['logout'] == 1:
+            print 'need relogin'
+            self.get_user_input_name_pass()
+            self.login_from_net(self.username, self.password)
+            return self.playlist()
+        else:
+            return result['song']
      
     def del_song(self, sid, aid):
         params = self.get_params('b')
