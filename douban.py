@@ -33,7 +33,7 @@ class PrivateFM(object):
             self.login_from_net(self.username, self.password)
 
     def get_user_input_name_pass(self):
-        self.username = raw_input("请输入豆瓣登录账户：") 
+        self.username = raw_input("请输入豆瓣登录账户：")
         import getpass
         self.password = getpass.getpass("请输入豆瓣登录密码：")
 
@@ -85,8 +85,13 @@ class PrivateFM(object):
                 print 'login failed'
                 print body['err_msg']
                 thread.exit()
-                return 
-            print 'ok'
+                return
+            user_info = body['user_info']
+            play_record = user_info['play_record']
+            print user_info['name'],
+            print '累积收听'+str(play_record['played'])+'首',
+            print '加红心'+str(play_record['liked'])+'首',
+            print '收藏兆赫'+str(play_record['fav_chls_count'])+'个'
             self.login_from_cookie()
 
     def get_captcha_solution(self, captcha_id):
@@ -213,7 +218,14 @@ class PrivateFM(object):
         print 'fetching playlist ...'
         params = self.get_params('n')
         result = self.communicate(params)
-        return json.loads(result)['song']
+        result = json.loads(result)
+        if result.has_key('logout') and result['logout'] == 1:
+            print 'need relogin'
+            self.get_user_input_name_pass()
+            self.login_from_net(self.username, self.password)
+            return self.playlist()
+        else:
+            return result['song']
      
     def del_song(self, sid, aid):
         params = self.get_params('b')
