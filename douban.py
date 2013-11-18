@@ -35,6 +35,8 @@ class PrivateFM(object):
 
     def get_user_input_name_pass(self):
         self.username = raw_input("请输入豆瓣登录账户：")
+
+        # 听说有个可以显示*的
         import getpass
         self.password = getpass.getpass("请输入豆瓣登录密码：")
 
@@ -65,7 +67,8 @@ class PrivateFM(object):
         data['captcha_id'] = captcha_id
         data['captcha_solution'] = captcha
         data = urllib.urlencode(data)
-        print 'login ...'
+
+        print 'Login ...'
         with closing(self.get_fm_conn()) as conn:
             headers = self.get_headers_for_request({
                 'Origin': 'http://douban.fm',
@@ -79,7 +82,6 @@ class PrivateFM(object):
                 cookie = SimpleCookie(set_cookie)
                 self.save_cookie(cookie)
 
-            print response.status
             body = response.read();
             body = json.loads(body)
             if body['r'] != 0:
@@ -105,7 +107,6 @@ class PrivateFM(object):
 
     def show_captcha_image(self, captcha_id):
         with closing(self.get_fm_conn()) as conn:
-            print 'Fetching captcha image...'
             path = "/misc/captcha?size=m&id=" + captcha_id
 
             import cStringIO
@@ -114,7 +115,6 @@ class PrivateFM(object):
 
             conn.request("GET", path, None, headers)
             response = conn.getresponse()
-            print response.status
 
             set_cookie = response.getheader('Set-Cookie')
             if not set_cookie is None:
@@ -146,7 +146,6 @@ class PrivateFM(object):
         return headers
 
     def get_captcha_id(self, path = "/j/new_captcha"):
-        print 'Fetching captcha id ...'
         with closing(self.get_fm_conn()) as conn:
 
             headers = self.get_headers_for_request()
@@ -159,10 +158,8 @@ class PrivateFM(object):
                 cookie = SimpleCookie(set_cookie)
                 self.save_cookie(cookie)
 
-            print response.status
-
             if response.status == 302:
-                print u'第一次获取时，有几次302是正常的，请耐心等待'
+                print '...'
                 redirect_url = response.getheader('location')
                 return self.get_captcha_id(redirect_url)
             if response.status == 200:
