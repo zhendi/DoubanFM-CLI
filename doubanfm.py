@@ -9,7 +9,7 @@ import gst, json, urllib, urllib2, httplib, contextlib, random, binascii
 from select import select
 from Cookie import SimpleCookie
 from contextlib import closing
-from douban import PrivateFM
+import douban
 
 class DoubanFM_CLI:
     def __init__(self, channel):
@@ -46,7 +46,7 @@ class DoubanFM_CLI:
             self.songlist = self.user.playlist()
         elif self.private:
             self.get_user_name_pass()
-            self.user = PrivateFM(self.channel)
+            self.user = douban.PrivateFM(self.channel)
             self.songlist = self.user.playlist()
         else:
             self.songlist = json.loads(urllib.urlopen(self.ch).read())['song']
@@ -116,7 +116,7 @@ class Channel:
         self.init_info()
 
     def init_info(self):
-        cache = Cache()
+        cache = douban.Cache()
         if cache.has('channel'):
             self.info = cache.get('channel')
         else:
@@ -128,7 +128,7 @@ class Channel:
             cache.set('channel', self.info)
 
     def get_id_and_name(self):
-        print 'fetching channel list ...'
+        print 'Fetching channel list ...'
         # this var should name to text or string or something
         self.html = urllib2.urlopen(self.url).read()
         chls = json.loads(self.html)["data"]["channel"]["creator"]["chls"]
@@ -141,33 +141,6 @@ class Channel:
         print u'频道列表：'
         for i in sorted(self.info.iterkeys()):
             print("%8s %s" % (i, self.info[i]))
-
-# this class should have a file
-class Cache:
-    """docstring for cache"""
-    def has(self, name):
-        file_name = self.get_cache_file_name(name)
-        return os.path.exists(file_name)
-
-    def get(self, name, default = None):
-        file_name = self.get_cache_file_name(name)
-        if not os.path.exists(file_name):
-            return default
-        cache_file = open(file_name, 'rb')
-        content = pickle.load(cache_file)
-        cache_file.close()
-        return content
-
-    def set(self, name, content):
-        file_name = self.get_cache_file_name(name)
-        cache_file = open(file_name, 'wb')
-        pickle.dump(content, cache_file)
-        cache_file.close()
-
-    def get_cache_file_name(self, name):
-        # file should put to /tmp ?
-        # but maybe someone clear their /tmp everyday ?
-        return name + '.cache'
 
 def main():
     print u'豆瓣电台'
