@@ -45,16 +45,10 @@ class DoubanFM_CLI:
         if self.user:
             self.songlist = self.user.playlist()
         elif self.private:
-            self.get_user_name_pass()
             self.user = douban.PrivateFM(self.channel)
             self.songlist = self.user.playlist()
         else:
             self.songlist = json.loads(urllib.urlopen(self.ch).read())['song']
-
-    def get_user_name_pass(self):
-        # todo we should del this method
-        self.username = ''
-        self.password = ''
 
     def control(self,r):
         rlist, _, _ = select([sys.stdin], [], [], 1)

@@ -36,7 +36,7 @@ class PrivateFM(object):
     def get_user_input_name_pass(self):
         self.username = raw_input("请输入豆瓣登录账户：")
 
-        # 听说有个可以显示*的
+        # todo 听说有个可以显示*的
         import getpass
         self.password = getpass.getpass("请输入豆瓣登录密码：")
 
