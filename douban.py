@@ -7,10 +7,11 @@ import sys, os, time, thread, glib, gobject, datetime
 import pickle
 import pygst
 pygst.require("0.10")
-import gst, json, urllib, httplib, contextlib, random, binascii
+import gst, json, urllib, httplib, contextlib, random, binascii, calendar
 from select import select
 from Cookie import SimpleCookie
 from contextlib import closing 
+from dateutil import parser
 
 class PrivateFM(object):
     def __init__ (self, channel):
@@ -176,8 +177,8 @@ class PrivateFM(object):
         for key in cookie:
             expires = cookie[key]['expires']
             if expires:
-                expires = time.strptime(expires, '%a, %d-%b-%Y %H:%M:%S GMT')
-                expires = time.mktime(expires)
+                expires = parser.parse(expires)
+                expires = calendar.timegm(expires.utctimetuple())
                 now = time.time()
                 if expires > now:
                     self.cookie[key] = cookie[key]
