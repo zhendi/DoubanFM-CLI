@@ -41,6 +41,12 @@
 interval:30 ; 歌与歌之间的沉默间隙，单位：秒。默认值：0
 ```
 
+**依賴**
+
+- `python-gst` ，如debian系需要 `sudo apt-get install python-gst0.10`
+- `Python Imaging Library` ，如debian系 `sudo apt-get install python-imaging`
+
 **其他**
 
-不支持 Windows 
+- 不支持 Windows 
+
