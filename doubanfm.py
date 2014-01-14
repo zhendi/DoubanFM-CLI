@@ -83,7 +83,6 @@ class DoubanFM_CLI:
             self.skip_mode = False
             is_first_song = False
 
-            # print_playing()
             print u'正在播放： '+r['title']+u'     歌手： '+r['artist'],
             if int(r['like']) == 1:
                 print u'    ♥'
