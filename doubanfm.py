@@ -69,7 +69,7 @@ class DoubanFM_CLI:
                 print "删歌成功:)"
                 return 'del'
 
-    def start(self):
+    def start(self, loop):
         self.get_songlist()
         is_first_song = True
         for r in self.songlist:
@@ -83,7 +83,6 @@ class DoubanFM_CLI:
             self.skip_mode = False
             is_first_song = False
 
-            # print_playing()
             print u'正在播放： '+r['title']+u'     歌手： '+r['artist'],
             if int(r['like']) == 1:
                 print u'    ♥'
@@ -98,8 +97,8 @@ class DoubanFM_CLI:
                     self.player.set_state(gst.STATE_NULL)
                     self.playmode = False
                     break
-        if loop is not None:
-            loop.quit()
+        print loop
+        loop.quit()
 
 
 class Channel:
@@ -145,15 +144,14 @@ def main():
     while 1:
         # doubanfm.start()
         # break
-        thread.start_new_thread(doubanfm.start, ())
-        gobject.threads_init()
         loop = glib.MainLoop()
+        thread.start_new_thread(doubanfm.start, (loop,))
+        gobject.threads_init()
         loop.run()
 
 
 if __name__ == "__main__":
-    loop = None
     try:
         main()
     except KeyboardInterrupt:
-        pass
+        print
