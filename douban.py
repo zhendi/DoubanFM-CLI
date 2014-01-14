@@ -7,13 +7,15 @@ import sys, os, time, thread, glib, gobject, datetime
 import pickle
 import pygst
 pygst.require("0.10")
-import gst, json, urllib, httplib, contextlib, random, binascii
+import gst, json, urllib, httplib, contextlib, random, binascii, calendar
 from select import select
 from Cookie import SimpleCookie
 from contextlib import closing 
+from dateutil import parser
 
 class PrivateFM(object):
     def __init__ (self, channel):
+        self.cache = Cache()
         self.channel = channel
         # todo remove this var
         self.dbcl2 = None
@@ -22,7 +24,7 @@ class PrivateFM(object):
 
     def init_cookie(self):
         self.cookie = {}
-        cookie = self.get_cache('cookie', {})
+        cookie = self.cache.get('cookie', {})
         self.merge_cookie(cookie)
     
     def login(self):
@@ -34,6 +36,8 @@ class PrivateFM(object):
 
     def get_user_input_name_pass(self):
         self.username = raw_input("请输入豆瓣登录账户：")
+
+        # todo 听说有个可以显示*的
         import getpass
         self.password = getpass.getpass("请输入豆瓣登录密码：")
 
@@ -64,7 +68,8 @@ class PrivateFM(object):
         data['captcha_id'] = captcha_id
         data['captcha_solution'] = captcha
         data = urllib.urlencode(data)
-        print 'login ...'
+
+        print 'Login ...'
         with closing(self.get_fm_conn()) as conn:
             headers = self.get_headers_for_request({
                 'Origin': 'http://douban.fm',
@@ -78,7 +83,6 @@ class PrivateFM(object):
                 cookie = SimpleCookie(set_cookie)
                 self.save_cookie(cookie)
 
-            print response.status
             body = response.read();
             body = json.loads(body)
             if body['r'] != 0:
@@ -89,7 +93,7 @@ class PrivateFM(object):
             user_info = body['user_info']
             play_record = user_info['play_record']
             print user_info['name'],
-            print '累积收听'+str(play_record['played'])+'首',
+            print '累计收听'+str(play_record['played'])+'首',
             print '加红心'+str(play_record['liked'])+'首',
             print '收藏兆赫'+str(play_record['fav_chls_count'])+'个'
             self.login_from_cookie()
@@ -104,7 +108,6 @@ class PrivateFM(object):
 
     def show_captcha_image(self, captcha_id):
         with closing(self.get_fm_conn()) as conn:
-            print 'fetching captcha image...'
             path = "/misc/captcha?size=m&id=" + captcha_id
 
             import cStringIO
@@ -113,7 +116,6 @@ class PrivateFM(object):
 
             conn.request("GET", path, None, headers)
             response = conn.getresponse()
-            print response.status
 
             set_cookie = response.getheader('Set-Cookie')
             if not set_cookie is None:
@@ -145,7 +147,6 @@ class PrivateFM(object):
         return headers
 
     def get_captcha_id(self, path = "/j/new_captcha"):
-        print 'fetching captcha id ...'
         with closing(self.get_fm_conn()) as conn:
 
             headers = self.get_headers_for_request()
@@ -158,10 +159,8 @@ class PrivateFM(object):
                 cookie = SimpleCookie(set_cookie)
                 self.save_cookie(cookie)
 
-            print response.status
-
             if response.status == 302:
-                print u'第一次获取时，有几次302是正常的，请耐心等待'
+                print '...'
                 redirect_url = response.getheader('location')
                 return self.get_captcha_id(redirect_url)
             if response.status == 200:
@@ -170,7 +169,7 @@ class PrivateFM(object):
 
     def save_cookie(self, cookie):
         self.merge_cookie(cookie)
-        self.set_cache('cookie', self.cookie)
+        self.cache.set('cookie', self.cookie)
 
     # maybe we should extract a class XcCookie(SimpleCookie)
     # merge(SimpleCookie)
@@ -178,8 +177,8 @@ class PrivateFM(object):
         for key in cookie:
             expires = cookie[key]['expires']
             if expires:
-                expires = time.strptime(expires, '%a, %d-%b-%Y %H:%M:%S GMT')
-                expires = time.mktime(expires)
+                expires = parser.parse(expires)
+                expires = calendar.timegm(expires.utctimetuple())
                 now = time.time()
                 if expires > now:
                     self.cookie[key] = cookie[key]
@@ -215,7 +214,7 @@ class PrivateFM(object):
             return result
 
     def playlist(self):
-        print 'fetching playlist ...'
+        print 'Fetching playlist ...'
         params = self.get_params('n')
         result = self.communicate(params)
         result = json.loads(result)
@@ -245,9 +244,14 @@ class PrivateFM(object):
         params['sid'] = sid
         params['aid'] = aid
         self.communicate(params)
-        
-    # todo should use Cache
-    def get_cache(self, name, default = None):
+
+class Cache:
+    """docstring for cache"""
+    def has(self, name):
+        file_name = self.get_cache_file_name(name)
+        return os.path.exists(file_name)
+
+    def get(self, name, default = None):
         file_name = self.get_cache_file_name(name)
         if not os.path.exists(file_name):
             return default
@@ -256,11 +260,14 @@ class PrivateFM(object):
         cache_file.close()
         return content
 
-    def set_cache(self, name, content):
+    def set(self, name, content):
         file_name = self.get_cache_file_name(name)
         cache_file = open(file_name, 'wb')
         pickle.dump(content, cache_file)
         cache_file.close()
 
     def get_cache_file_name(self, name):
+        # file should put to /tmp ?
+        # but maybe someone clear their /tmp everyday ?
         return name + '.cache'
+
