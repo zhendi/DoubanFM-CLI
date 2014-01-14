@@ -267,7 +267,6 @@ class Cache:
         cache_file.close()
 
     def get_cache_file_name(self, name):
-        # file should put to /tmp ?
-        # but maybe someone clear their /tmp everyday ?
+        # file should put into a `cache` dir
         return name + '.cache'
 
