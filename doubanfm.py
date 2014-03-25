@@ -12,23 +12,33 @@ from contextlib import closing
 import douban
 
 class DoubanFM_CLI:
-    def __init__(self, channel):
-        config = ConfigParser.SafeConfigParser({'interval': '0'})
+    def __init__(self):
+        config = ConfigParser.SafeConfigParser({
+            'interval': '0',
+            'pre_set_channel': 'False',
+            'pre_set_channel_id': '0'})
         config.read('doubanfm.config')
         self.delay_after_every_song = config.getfloat('DEFAULT', 'interval')
+
+        if config.getboolean('DEFAULT', 'pre_set_channel'):
+            self.channel = str(config.getint('DEFAULT', 'pre_set_channel_id'))
+        else:
+            Channel().show()
+            self.channel = raw_input('请输入您想听的频道数字:')
+
         self.skip_mode = False
         self.user = None
         self.username = ''
-        self.channel = channel
-        if channel == '0' or channel == '-3':
+        if self.channel == '0' or self.channel == '-3':
             self.private = True
         else:
             self.private = False
         self.player = gst.element_factory_make("playbin", "player")
+        self.pause = False
         bus = self.player.get_bus()
         bus.add_signal_watch()
         bus.connect("message", self.on_message)
-        self.ch = 'http://douban.fm/j/mine/playlist?type=p&sid=&channel='+channel
+        self.ch = 'http://douban.fm/j/mine/playlist?type=p&sid=&channel='+self.channel
 
     def on_message(self, bus, message):
         t = message.type
@@ -53,21 +63,32 @@ class DoubanFM_CLI:
     def control(self,r):
         rlist, _, _ = select([sys.stdin], [], [], 1)
         if rlist:
-            s = sys.stdin.readline()
-            if s[0] == 'n':
-                print '下一首...'
-                self.skip_mode = True
-                return 'next'
-            elif s[0] == 'f' and self.private:
-                print '正在加心...'
-                self.user.fav_song(r['sid'], r['aid'])
-                print "加心成功:)"
-                return 'fav'
-            elif s[0] == 'd' and self.private:
-                print '不再收听...'
-                self.songlist = self.user.del_song(r['sid'], r['aid'])
-                print "删歌成功:)"
-                return 'del'
+            s = sys.stdin.readline().rstrip()
+            if s:
+                if s == 'n':
+                    print '下一首...'
+                    self.skip_mode = True
+                    return 'next'
+                elif s == 'f' and self.private:
+                    print '正在加心...'
+                    self.user.fav_song(r['sid'], r['aid'])
+                    print "加心成功:)\n"
+                    return 'fav'
+                elif s == 'd' and self.private:
+                    print '不再收听...'
+                    self.songlist = self.user.del_song(r['sid'], r['aid'])
+                    print "删歌成功:)\n"
+                    return 'del'
+                elif s == 'p' and not self.pause:
+                    print '已暂停...'
+                    print '输入p以恢复播放\n'
+                    return 'pause'
+                elif s == 'r' and self.pause:
+                    print '恢复播放...'
+                    print '继续享受美妙的音乐吧:)\n'
+                    return 'resume'
+                else:
+                    print '错误的操作，请重试\n'
 
     def start(self, loop):
         self.get_songlist()
@@ -85,9 +106,9 @@ class DoubanFM_CLI:
 
             print u'正在播放： '+r['title']+u'     歌手： '+r['artist'],
             if int(r['like']) == 1:
-                print u'    ♥'
+                print u'    ♥\n'
             else:
-                print
+                print '\n'
 
             self.player.set_property("uri", song_uri) # when ads, flv, warning print
             self.player.set_state(gst.STATE_PLAYING)
@@ -97,6 +118,13 @@ class DoubanFM_CLI:
                     self.player.set_state(gst.STATE_NULL)
                     self.playmode = False
                     break
+                elif c == 'pause':
+                    self.pause = True
+                    self.player.set_state(gst.STATE_PAUSED)
+                elif c == 'resume':
+                    self.pause = False
+                    self.player.set_state(gst.STATE_PLAYING)
+
         loop.quit()
 
 
@@ -120,7 +148,7 @@ class Channel:
             cache.set('channel', self.info)
 
     def get_id_and_name(self):
-        print 'Fetching channel list ...'
+        print '获取频道列表…\n'
         # this var should name to text or string or something
         self.html = urllib2.urlopen(self.url).read()
         chls = json.loads(self.html)["data"]["channel"]["creator"]["chls"]
@@ -136,13 +164,12 @@ class Channel:
 
 def main():
     print u'豆瓣电台'
-    Channel().show()
-    c = raw_input('请输入您想听的频道数字:')
-    print u"\r\n\t跳过输入n，加心输入f，删歌输入d\r\n"
-    doubanfm = DoubanFM_CLI(c)
+    doubanfm = DoubanFM_CLI()
+
+    print u"\r\n\t跳过输入n，加心输入f，删歌输入d，暂停输入p\r\n"
+    # print u"\r\n\t跳过输入n(ext)，加心输入f(avorite)，删歌输入d(elete)，暂停输入p(ause)\r\n"
+
     while 1:
-        # doubanfm.start()
-        # break
         loop = glib.MainLoop()
         thread.start_new_thread(doubanfm.start, (loop,))
         gobject.threads_init()
@@ -153,4 +180,4 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print
+        print "再见！"
