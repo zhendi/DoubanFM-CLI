@@ -38,7 +38,9 @@
 
 ```
 [DEFAULT]
-interval:30 ; 歌与歌之间的沉默间隙，单位：秒。默认值：0
+interval=30 ; 歌与歌之间的沉默间隙，单位：秒。默认值：0
+email=xxx@gmail.com; 登录用户名
+passwd=xxx; 登录密码
 ```
 
 **依賴**
@@ -46,6 +48,8 @@ interval:30 ; 歌与歌之间的沉默间隙，单位：秒。默认值：0
 - `python-gst` ，如debian系需要 `sudo apt-get install python-gst0.10`
 - `Python Imaging Library` ，如debian系 `sudo apt-get install python-imaging`
 - `python-dateutil` ，如debian系 `sudo apt-get install python-dateutil`
+- `gstreamer0.10-plugins`
+- `gstreamer0.10-plugins-ugly`
 
 **其他**
 

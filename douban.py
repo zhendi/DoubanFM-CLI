@@ -12,6 +12,7 @@ from select import select
 from Cookie import SimpleCookie
 from contextlib import closing 
 from dateutil import parser
+from ConfigParser import SafeConfigParser
 
 class PrivateFM(object):
     def __init__ (self, channel):
@@ -35,11 +36,23 @@ class PrivateFM(object):
             self.login_from_net(self.username, self.password)
 
     def get_user_input_name_pass(self):
-        self.username = raw_input("请输入豆瓣登录账户：")
+        config = SafeConfigParser()
+        config.read("doubanfm.config")
+        if config.has_option("DEFAULT","email"):
+            self.username = config.get("DEFAULT","email").strip()
+        else:
+            self.username = raw_input("请输入豆瓣登录账户：")
+            config.set("DEFAULT","email",self.username)
 
-        # todo 听说有个可以显示*的
-        import getpass
-        self.password = getpass.getpass("请输入豆瓣登录密码：")
+        if config.has_option("DEFAULT","passwd"):
+            self.password = config.get("DEFAULT","passwd").strip()
+        else:
+            # todo 听说有个可以显示*的
+            import getpass
+            self.password = getpass.getpass("请输入豆瓣登录密码：")
+            config.set("DEFAULT","passwd",self.password)
+        
+        config.write(open("doubanfm.config","w+"))
 
     def remember_cookie(self):
         return 'dbcl2' in self.cookie and 'bid' in self.cookie
