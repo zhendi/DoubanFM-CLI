@@ -57,9 +57,7 @@ class DoubanFM_CLI:
         else:
             self.private = False
 
-        if self.user:
-            self.songlist = self.user.playlist()
-        elif self.private:
+        if self.private:
             self.user = douban.PrivateFM(self.channel)
             self.songlist = self.user.playlist()
         else:
@@ -96,13 +94,13 @@ class DoubanFM_CLI:
                     Channel().show()
                     print('请输入您想听的频道数字:')
                 elif s.isdigit() or (s.startswith('-') and s[1:].isdigit()):
-                    self.channel = int(s)
+                    self.channel = s
                     return 'channel'
                 else:
                     print '错误的操作，请重试\n'
 
     def start(self, loop):
-        print u'正在播放 %s 频道\n' % Channel().info[int(self.channel)]
+        print u'\n正在播放 %s 频道\n' % Channel().info[int(self.channel)]
         self.get_songlist()
         is_first_song = True
         for r in self.songlist:
@@ -117,7 +115,7 @@ class DoubanFM_CLI:
             self.skip_mode = False
             is_first_song = False
 
-            print u'正在播放： '+r['title']+u'     歌手： '+r['artist'],
+            print u'\n\n正在播放： '+r['title']+u'     歌手： '+r['artist'],
             if int(r['like']) == 1:
                 print u'    ♥\n'
             else:
@@ -185,7 +183,7 @@ def main():
     print u'豆瓣电台'
     doubanfm = DoubanFM_CLI()
 
-    print u"\r\n\t跳过输入n，加心输入f，删歌输入d，暂停输入p, 切换频道输入c\r\n"
+    print u"\r\n\t跳过输入n，加心输入f，删歌输入d，暂停输入p，播放输入r，切换频道输入c\r\n"
 
     while 1:
         loop = glib.MainLoop()
