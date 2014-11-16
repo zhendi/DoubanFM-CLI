@@ -68,6 +68,7 @@ class DoubanFM_CLI:
                 if s == 'n':
                     print '下一首...'
                     self.skip_mode = True
+                    self.pause = False
                     return 'next'
                 elif s == 'f' and self.private:
                     print '正在加心...'
