@@ -10,6 +10,7 @@ from select import select
 from Cookie import SimpleCookie
 from contextlib import closing
 import douban
+import datetime
 
 class DoubanFM_CLI:
     def __init__(self):
@@ -31,6 +32,7 @@ class DoubanFM_CLI:
         self.username = ''
         self.player = gst.element_factory_make("playbin", "player")
         self.pause = False
+        self.playing = False
         bus = self.player.get_bus()
         bus.add_signal_watch()
         bus.connect("message", self.on_message)
@@ -50,6 +52,12 @@ class DoubanFM_CLI:
             err, debug = message.parse_error()
             print "Error: %s" % err, debug
             self.playmode = False
+        elif t== gst.MESSAGE_STATE_CHANGED: 
+            old_state, new_state, pending_state = message.parse_state_changed()
+            if new_state == gst.STATE_PLAYING:
+                self.playing = True
+            elif new_state == gst.STATE_PAUSED:
+                self.playing = False
 
     def get_songlist(self):
         if self.channel == '0' or self.channel == '-3':
@@ -84,7 +92,7 @@ class DoubanFM_CLI:
                     return 'del'
                 elif s == 'p' and not self.pause:
                     print '已暂停...'
-                    print '输入p以恢复播放\n'
+                    print '输入r以恢复播放\n'
                     return 'pause'
                 elif s == 'r' and self.pause:
                     print '恢复播放...'
@@ -93,11 +101,17 @@ class DoubanFM_CLI:
                 elif s == 'c' :
                     Channel().show()
                     print('请输入您想听的频道数字:')
+                elif s == 'h' :
+                    self.print_menu() 
                 elif s.isdigit() or (s.startswith('-') and s[1:].isdigit()):
                     self.channel = s
                     return 'channel'
                 else:
                     print '错误的操作，请重试\n'
+
+    def print_menu(self):
+        print u"\r\n\t跳过输入n，加心输入f，删歌输入d，暂停输入p，播放输入r，切换频道输入c\r\n"
+
 
     def start(self, loop):
         print u'\n正在播放 %s 频道\n' % Channel().info[int(self.channel)]
@@ -139,6 +153,18 @@ class DoubanFM_CLI:
                     self.player.set_state(gst.STATE_NULL)
                     self.playmode = False
                     break
+                elif self.playing == True and self.playmode == True:
+                    try:
+                        duration = self.player.query_duration(gst.FORMAT_TIME)
+                        position = self.player.query_position(gst.FORMAT_TIME)
+                    except Exception, e:
+                        pass
+                    else:
+                        dura = datetime.timedelta(seconds=(duration[0] / gst.SECOND))
+                        posi  = datetime.timedelta(seconds=(position[0] / gst.SECOND))
+                        progress = str(posi)[2:]+" / " +str(dura)[2:]
+                        sys.stdout.write(u"\r%s%s        " % ("  ",progress))
+                        sys.stdout.flush()
             if c == 'channel':
                 break 
 
@@ -183,7 +209,7 @@ def main():
     print u'豆瓣电台'
     doubanfm = DoubanFM_CLI()
 
-    print u"\r\n\t跳过输入n，加心输入f，删歌输入d，暂停输入p，播放输入r，切换频道输入c\r\n"
+    doubanfm.print_menu()
 
     while 1:
         loop = glib.MainLoop()
